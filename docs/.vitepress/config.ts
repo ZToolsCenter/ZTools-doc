@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 
 // refer https://vitepress.dev/reference/site-config for details
 export default defineConfig({
+  base: './', // 使用相对路径，确保静态资源可以正确加载
   lang: 'zh-CN',
   title: 'ZTools 开发者文档',
   description: 'ZTools 开发者文档',
