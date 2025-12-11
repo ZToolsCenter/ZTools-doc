@@ -34,9 +34,9 @@ export default defineConfig({
         text: '详细',
         items: [
           { text: '插件应用目录结构', link: '/file-structure' },
-          { text: 'plugin.json 配置', link: '/plugin.json' },
-          { text: 'preload.js 配置', link: '/preload.js' },
-          { text: 'Node.js 能力', link: '/node.js' },
+          { text: 'plugin.json 配置', link: '/plugin-json' },
+          { text: 'preload.js 配置', link: '/preload-js' },
+          { text: 'Node.js 能力', link: '/node-js' },
           { text: '插件 API', link: '/plugin-api' },
         ]
       }
