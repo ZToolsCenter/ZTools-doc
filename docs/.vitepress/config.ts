@@ -7,6 +7,10 @@ export default defineConfig({
   title: 'ZTools 开发者文档',
   description: 'ZTools 开发者文档',
 
+  head: [
+    ['link', { rel: 'icon', href: '/logo.png' }],
+  ],
+
   themeConfig: {
     nav: [
       { text: 'Example', link: '/example' },
@@ -27,13 +31,14 @@ export default defineConfig({
       {
         text: '开始',
         items: [
-          { text: '快速上手', link: '/file-structure' },
+          { text: '快速开始', link: '/getting-started' },
+          { text: '插件应用目录结构', link: '/file-structure' },
+          { text: '第一个插件', link: '/first-plugin' },
         ],
       },
       {
         text: '详细',
         items: [
-          { text: '插件应用目录结构', link: '/file-structure' },
           { text: 'plugin.json 配置', link: '/plugin-json' },
           { text: 'preload.js 配置', link: '/preload-js' },
           { text: 'Node.js 能力', link: '/node-js' },

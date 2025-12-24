@@ -91,8 +91,8 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 - 说明：功能说明，显示在搜索结果中。
 
 ### `feature.cmds`
-- 类型：`Array<string | RegexCmd | OverCmd>`
-- 说明：触发指令列表。可以是简单的字符串，也可以是正则对象或全局匹配对象。
+- 类型：`Array<string | RegexCmd | OverCmd | ImgCmd | FilesCmd>`
+- 说明：触发指令列表。可以是简单的字符串，也可以是匹配对象（正则、全局、图片、文件等）。
 
 ### `feature.platform`
 - 类型：`Array<'win32' | 'darwin' | 'linux'>`
@@ -166,3 +166,79 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 - `exclude`: (可选) 排除匹配的正则表达式字符串
 - `minLength`: (可选) 最小字符数
 - `maxLength`: (可选) 最大字符数 (默认 10000)
+
+### 图片匹配指令 (ImgCmd)
+当用户粘贴图片到 ZTools 时触发，用于处理图片的插件（如图片压缩、格式转换、OCR 识别等）。
+
+```json
+{
+  "features": [
+    {
+      "code": "image-process",
+      "explain": "图片处理",
+      "cmds": [
+        {
+          "type": "img",
+          "label": "图片处理"
+        }
+      ]
+    }
+  ]
+}
+```
+- `type`: 固定为 `"img"`
+- `label`: 显示的名称
+
+**使用场景**：
+- 图片压缩
+- 图片格式转换
+- OCR 文字识别
+- 图片编辑
+- 图片上传
+
+### 文件匹配指令 (FilesCmd)
+当用户粘贴文件或文件夹到 ZTools 时触发，支持多种过滤条件来精确匹配文件。
+
+```json
+{
+  "features": [
+    {
+      "code": "file-process",
+      "explain": "文件处理",
+      "cmds": [
+        {
+          "type": "files",
+          "label": "批量重命名",
+          "fileType": "file",
+          "extensions": ["txt", "md", "json"],
+          "match": "/^test/i",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      ]
+    }
+  ]
+}
+```
+
+- `type`: 固定为 `"files"`
+- `label`: 显示的名称
+- `fileType`: (可选) 文件类型，`"file"` 表示只匹配文件，`"directory"` 表示只匹配文件夹。不指定则文件和文件夹都匹配
+- `extensions`: (可选) 文件扩展名数组，只对文件有效（不检查文件夹）。例如 `["jpg", "png", "gif"]`
+- `match`: (可选) 匹配文件(夹)名称的正则表达式字符串。例如 `"/^test/i"` 表示匹配以 "test" 开头的文件名（不区分大小写）
+- `minLength`: (可选) 最少文件数，默认 1
+- `maxLength`: (可选) 最多文件数，默认 10000
+
+**匹配规则**：
+1. 首先检查文件数量是否在 `minLength` 和 `maxLength` 范围内
+2. 然后检查每个文件是否满足以下条件（如果指定）：
+   - 文件类型（`fileType`）
+   - 文件扩展名（`extensions`）
+   - 文件名正则匹配（`match`）
+
+**使用场景**：
+- 批量文件重命名
+- 文件格式转换
+- 文件压缩打包
+- 文件批量上传
+- 代码文件批量处理

@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 开始使用
-      link: /file-structure
+      link: /getting-started
     - theme: alt
       text: API 参考
       link: /plugin-api
