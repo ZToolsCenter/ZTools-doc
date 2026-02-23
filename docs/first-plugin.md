@@ -40,7 +40,8 @@ ztools create my-first-plugin
    - **Preload Only (TypeScript)** - 仅使用 Preload API，无 UI 界面
 
 2. **输入插件信息**：
-   - **Plugin name** - 插件显示名称（在 ZTools 中显示的名称）
+   - **Plugin name** - 插件唯一标识（ID），用于系统内部识别
+   - **Plugin title** - 插件显示名称（在 ZTools 中展示给用户的标题）
    - **Plugin description** - 插件描述
    - **Author** - 作者名称
 
@@ -168,7 +169,7 @@ my-first-plugin/
 
 ### Q: 如何修改插件配置？
 
-A: 编辑项目根目录下的 `plugin.json` 文件。你可以修改插件名称、描述、功能列表等。更多信息请参考 [plugin.json 配置](./plugin-json.md)。
+A: 编辑项目根目录下的 `plugin.json` 文件。你可以修改插件标识（name）、显示名称（title）、描述、功能列表等。更多信息请参考 [plugin.json 配置](./plugin-json.md)。
 
 ### Q: 如何添加插件功能？
 

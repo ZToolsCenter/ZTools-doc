@@ -7,7 +7,8 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 ```json
 {
   "name": "example",
-  "description": "示例",
+  "title": "示例插件",
+  "description": "这是一个示例插件",
   "version": "1.0.0",
   "main": "index.html",
   "logo": "logo.png",
@@ -28,7 +29,13 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 - 类型：`string`
 - 必填：是
 
-插件应用名称
+插件应用唯一标识（ID），用于在系统中唯一标识该插件。
+
+### `title`
+- 类型：`string`
+- 必填：是
+
+插件应用显示名称，在 ZTools 中展示给用户看的标题。
 
 ### `description`
 - 类型：`string`
