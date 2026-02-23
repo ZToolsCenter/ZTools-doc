@@ -9,7 +9,13 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **返回**: `string` - 应用名称，固定返回 `'ZTools'`。
 
-### `ztools.isMacOs()` / `window.ztools.isMacOS()`
+### `ztools.getPathForFile(file)`
+获取拖放文件的真实路径。用于处理用户拖放文件到插件界面的场景（基于 Electron `webUtils.getPathForFile`）。
+
+- **file**: `File` - 拖放事件中的 File 对象。
+- **返回**: `string` - 文件的本地路径。
+
+### `ztools.isMacOs()` / `ztools.isMacOS()`
 检测当前是否为 macOS 系统。
 
 - **返回**: `boolean` - 是否为 macOS。
@@ -33,6 +39,11 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 获取应用版本号。
 
 - **返回**: `string` - 应用版本号。
+
+### `ztools.getWindowType()`
+获取当前窗口类型。
+
+- **返回**: `string` - 窗口类型。
 
 ### `ztools.isDarkColors()`
 检测当前是否为深色主题。
@@ -134,10 +145,16 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 - **callback**: `(isKill: boolean) => void` - 回调函数，接收退出参数。
   - `isKill`: 是否为强制退出（杀死进程）。
 
-### `ztools.onMainPush(callback)`
-监听主进程推送消息。
+### `ztools.onPluginDetach(callback)`
+监听插件被分离为独立窗口的事件。当用户将插件从主窗口分离时触发。
 
-- **callback**: `(data: any) => void` - 回调函数，接收推送的数据。
+- **callback**: `() => void` - 回调函数。
+
+### `ztools.onMainPush(callback, selectCallback)`
+注册主搜索推送功能。插件可以在主搜索框中提供搜索结果，用户无需进入插件即可看到结果。
+
+- **callback**: `(queryData: any) => object[]` - 查询回调函数，接收搜索数据，返回搜索结果数组。
+- **selectCallback**: `(selectData: any) => boolean` - (可选) 用户选择搜索结果时的回调函数。返回 `true` 表示需要进入插件。
 
 ### `ztools.onPluginReady(callback)`
 兼容旧 API，功能与 `onPluginEnter` 相同。
@@ -167,6 +184,16 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 子输入框失去焦点，插件应用获得焦点。
 
 - **返回**: `boolean` - 是否成功。
+
+### `ztools.subInputSelect()`
+子输入框获得焦点并选中全部内容。
+
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.removeSubInput()`
+移除（隐藏）子输入框。
+
+- **返回**: `Promise<boolean>` - 是否成功。
 
 ## 数据库 API
 
@@ -309,18 +336,20 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **返回**: `Promise<object>` - 状态信息。
 
-### `ztools.clipboard.write(id)`
+### `ztools.clipboard.write(id, shouldPaste)`
 将指定记录写入剪贴板。
 
 - **id**: `string` - 记录 ID。
+- **shouldPaste**: `boolean` - (可选) 是否同时模拟粘贴操作，默认 `true`。
 - **返回**: `Promise<boolean>` - 是否成功。
 
-### `ztools.clipboard.writeContent(data)`
+### `ztools.clipboard.writeContent(data, shouldPaste)`
 写入内容到剪贴板。
 
 - **data**: `object` - 数据对象。
   - `type`: `'text' | 'image'` - 内容类型。
   - `content`: `string` - 内容（文本或 base64 图片）。
+- **shouldPaste**: `boolean` - (可选) 是否同时模拟粘贴操作，默认 `true`。
 - **返回**: `Promise<boolean>` - 是否成功。
 
 ### `ztools.clipboard.updateConfig(config)`
@@ -485,4 +514,38 @@ DIP 区域转屏幕物理区域。
 清除请求头配置。
 
 - **返回**: `boolean` - 是否成功。
+
+## AI API
+
+### `ztools.ai(option, streamCallback)`
+调用 AI 模型。支持流式和非流式两种模式。返回一个 PromiseLike 对象，同时具有 `abort()` 方法可中断请求。
+
+- **option**: `object` - AI 调用配置。
+- **streamCallback**: `(chunk: any) => void` - (可选) 流式回调函数。传入此参数时启用流式模式，每收到一段数据会调用此回调。
+- **返回**: `PromiseLike & { abort: () => void }` - 可 await 的 Promise 对象。
+  - 非流式模式：resolve 时返回 AI 响应数据。
+  - 流式模式：数据通过 `streamCallback` 逐步推送，Promise resolve 时表示完成。
+  - 调用 `.abort()` 可中断请求。
+
+#### 使用示例
+
+```javascript
+// 非流式调用
+const result = await ztools.ai({ prompt: '你好' })
+
+// 流式调用
+const request = ztools.ai({ prompt: '你好' }, (chunk) => {
+  console.log('收到数据:', chunk)
+})
+await request
+
+// 中断请求
+request.abort()
+```
+
+### `ztools.allAiModels()`
+获取所有可用的 AI 模型列表。
+
+- **返回**: `Promise<object[]>` - AI 模型数组。
+- **异常**: 获取失败时抛出 Error。
 
