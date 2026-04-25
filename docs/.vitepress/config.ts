@@ -44,6 +44,12 @@ export default defineConfig({
           { text: 'Node.js 能力', link: '/node-js' },
           { text: '插件 API', link: '/plugin-api' },
         ]
+      },
+      {
+        text: '发布',
+        items: [
+          { text: '发布与协作流程', link: '/publish-and-update' },
+        ]
       }
     ],
 

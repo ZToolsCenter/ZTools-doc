@@ -101,6 +101,7 @@ pnpm run build
 1. ✅ 项目包含 `plugin.json` 文件（CLI 会自动生成）
 2. ✅ 已初始化 Git 仓库（`git init`）
 3. ✅ 至少有一次提交记录
+4. ✅ 工作区干净（没有未提交的改动）
 
 ### 初始化 Git 仓库
 
@@ -122,30 +123,47 @@ ztools publish
 
 #### 首次发布
 
-首次执行 `ztools publish` 时，CLI 会：
+首次执行 `ztools publish` 时，CLI 会自动完成：
 
-1. **GitHub OAuth 认证** - 自动打开浏览器进行 GitHub OAuth 认证
-2. **保存 Token** - 授权成功后，Token 将保存到本地（`~/.config/ztools/cli-config.json`）
-3. **Fork 仓库** - 自动 Fork ZTools 中心插件仓库（如果尚未 fork）
-4. **创建插件分支** - 创建名为 `plugin/{插件名称}` 的分支
-5. **重放提交历史** - 将所有 commit 历史重放到插件目录
-6. **推送到远程** - 推送到你的 fork 仓库
-7. **创建 Pull Request** - 自动创建 PR 到中心仓库
+1. **GitHub OAuth 认证** - 通过 Device Flow 引导你在浏览器授权一次（含 `workflow` scope），token 保存在 `~/.config/ztools/cli-config.json`
+2. **Fork 中心仓库** - 自动在你账号下 fork `ZToolsCenter/ZTools-plugins`（已存在则复用）
+3. **同步 fork main** - 调用 GitHub merge-upstream API 把 fork 的 main 拉齐到上游，避免后续分支基于落后的 main 导致冲突
+4. **判定 Add / Update** - 检查上游 `plugins/<你的插件 ID>/` 目录是否存在，决定 PR 标题用 `Add` 还是 `Update`
+5. **复制工作目录文件** - 把当前目录内容复制到 fork 的 `plugins/<插件 ID>/`（自动忽略 `node_modules`、`dist`、`.env*` 等）
+6. **生成 commit + 推送分支** - 在 fork 的 `plugin/<插件 ID>` 分支上做**一个** commit 并普通 push（不 force）
+7. **创建 Draft Pull Request** - 自动开 PR 到中心仓库，默认 draft 状态
 
-#### 后续发布
+#### 后续发布（增量更新）
 
-如果你修改了插件并再次执行 `ztools publish`，将会：
+每次 `ztools publish` 都是**增量追加**：
 
-- 保留所有新的 commit 历史
-- 创建新的 Pull Request
+- 远端分支保留旧 commit，只 fast-forward 追加一个新 commit
+- 同一个 PR 自动复用，链接不变
+- 不会 force-push，旧的 review 评论上下文不会丢失
 
-### 发布后的步骤
+> 例：你本地累计 5 个 commit 发布出去后，远端 PR 上是 1 个 "Add plugin Foo v0.1.0" commit；又改了 3 个 commit 再发布，远端就 fast-forward 多 1 个 "Update plugin Foo v0.1.1" commit，旧的不动。
 
-发布成功后，CLI 会显示 Pull Request 链接。接下来：
+更详细的发布与协作机制（CHANGELOG 自动注入、智能 commit 标题、`pull-contributions` 拉回审核者改动等）请参考 [发布与协作流程](./publish-and-update.md)。
 
-1. **访问 PR 链接** - 查看 Pull Request 详情
-2. **等待审核** - 等待维护者审核你的插件
-3. **插件上线** - PR 合并后，你的插件将在插件中心上线
+### 发布成功后
+
+CLI 会输出类似：
+
+```
+✨ 插件发布成功!
+🔗 Pull Request: https://github.com/ZToolsCenter/ZTools-plugins/pull/123
+
+💡 下一步：去 PR 网页完善以下内容（CLI 无法自动生成）
+  📸 上传截图 / 演示 GIF
+  ✅ 勾选自检清单
+  🚦 把 PR 从 Draft 切到 "Ready for review"
+```
+
+务必完成这 3 件事，否则维护者不会进入审核：
+
+1. **截图 / 演示 GIF** - 直接拖图到 PR description 编辑框，GitHub 会自动上传
+2. **自检清单** - PR description 里有 5 项 checkbox，逐条勾上
+3. **Mark as ready for review** - 右下角按钮，把 PR 从 Draft 切到正式审核状态
 
 ## 项目结构
 
@@ -188,7 +206,19 @@ A: 检查以下几点：
 
 ### Q: 如何更新已发布的插件？
 
-A: 修改代码后，提交更改并再次执行 `ztools publish`。CLI 会创建新的 Pull Request。
+A: 修改代码、`git commit`，然后再次执行 `ztools publish`。CLI 会自动在**同一个 PR** 上 fast-forward 追加一个新 commit，链接不变。如果上一次的 PR 已经合并，新的 publish 会以 `Update` 标题开一个新 PR。
+
+### Q: 审核者直接在 PR 分支上改了代码，我下次 publish 会被拒，怎么办？
+
+A: 跑 `ztools pull-contributions`，它会把审核者的 commit 三方合并回你本地，再 `ztools publish` 即可。详见 [发布与协作流程](./publish-and-update.md#pull-contributions)。
+
+### Q: PR 标题是怎么决定的？
+
+A: PR 标题始终是 `Add plugin <名称> v<版本>` 或 `Update plugin <名称> v<版本>`，由"中心仓库 main 是否已有该插件目录"决定。每次发布在 commit message 里会附带你本地自上次发布以来的 commit subjects 作为变更明细。
+
+### Q: 我删了上一个 PR 重新 publish 没反应？
+
+A: 你之前 publish 过时 fork 上分支已经存在；CLI 检测到本地内容与 fork 一致就不会再 commit。这种情况会**自动复用已有 branch 重开一个 PR**——直接重新跑 `ztools publish` 即可，新 PR 链接会显示在终端。
 
 ## 下一步
 
