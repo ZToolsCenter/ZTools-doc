@@ -543,9 +543,56 @@ await request
 request.abort()
 ```
 
+### `ztools.aiChat(option, eventCallback)`
+发起一次由插件自行管理工具循环的流式 Chat Completions 请求。ZTools 负责解析模型、保护供应商凭据、适配推理协议并传输流；不会确认、执行或回填模型返回的工具调用。
+
+- **option.model**: `string` - `allAiModels()` 返回的 `value`，兼容传入旧版 `id`。
+- **option.messages**: `object[]` - `system`、`user`、`assistant`、`tool` 消息数组，支持 `image_url` 内容块。
+- **option.tools**: `object[]` - (可选) OpenAI function calling 格式的工具定义。
+- **option.toolChoice**: `'auto' | 'none' | 'required'` - (可选) 工具选择策略。
+- **option.reasoning**: `object` - (可选) 覆盖宿主中该模型的推理协议、强度或响应字段。
+- **option.temperature**: `number` - (可选) 采样温度。
+- **option.maxTokens**: `number` - (可选) 最大输出 token 数。
+- **option.timeout**: `number` - (可选) 请求超时毫秒数。
+- **option.streamBatchIntervalMs**: `number` - (可选) 连续正文、思考和同一工具参数事件的合并窗口，范围为 `0～1000` 毫秒；`0` 或省略时逐事件回调。状态边界和请求结束前会强制刷新。
+- **eventCallback**: `(event) => void` - 接收 `request`、`reasoning`、`reasoning_end`、`content`、`tool_call` 和 `usage` 事件。
+- **返回**: `Promise<AssistantMessage> & { abort: () => void }` - 完整助手消息，包含 `content`、`reasoning_content`、`tool_calls`、`finish_reason` 和可选 `usage`。
+- **异常**: 请求失败时抛出带 `code` 的 Error；可用字段还包括 `status`、`providerCode`、`requestId` 和 `retryAfterMs`。
+
+#### 使用示例
+
+```javascript
+const models = await ztools.allAiModels()
+const events = []
+const request = ztools.aiChat(
+  {
+    model: models[0].value,
+    messages: [{ role: 'user', content: '列出当前目录中的文件' }],
+    streamBatchIntervalMs: 50,
+    tools: [
+      {
+        type: 'function',
+        function: {
+          name: 'list_files',
+          description: '列出目录内容',
+          parameters: {
+            type: 'object',
+            properties: { path: { type: 'string' } },
+            required: ['path']
+          }
+        }
+      }
+    ]
+  },
+  (event) => events.push(event)
+)
+
+const assistant = await request
+// assistant.tool_calls 仅描述模型请求的工具；插件需自行确认、执行并继续下一轮。
+```
+
 ### `ztools.allAiModels()`
 获取所有可用的 AI 模型列表。
 
-- **返回**: `Promise<object[]>` - AI 模型数组。
+- **返回**: `Promise<object[]>` - AI 模型数组。每项包含用于展示的 `label`、用于持久化和回传的稳定 `value`、远端 `modelId`、`contextWindow`、`inputModalities` 和 `reasoning` 能力；不会暴露供应商 API Key 或 API URL。
 - **异常**: 获取失败时抛出 Error。
-
