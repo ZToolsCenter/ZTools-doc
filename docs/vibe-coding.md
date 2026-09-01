@@ -8,7 +8,7 @@ Vibe Coding 是 ZTools 里的 AI 助手。你可以像聊天一样提需求，�
 
 在 ZTools 插件中心搜索 **Vibe Coding**，点击安装，然后打开插件。
 
-<img src="/img/01.png" width="833" alt="在插件中心搜索并安装 Vibe Coding" class="ne-image">
+![在插件中心搜索并安装 Vibe Coding](/img/01.png)
 
 首次使用需要先在 ZTools 设置中配置一个可用的 AI 模型。配置完成后，在聊天输入框下方选择模型即可开始对话。
 
@@ -24,7 +24,7 @@ Vibe Coding 是 ZTools 里的 AI 助手。你可以像聊天一样提需求，�
 
 在输入框下方打开能力选择，勾选“插件开发能力”。它会自动打开开发插件需要的工具；如果只是普通聊天，可以不勾选。
 
-<img src="/img/02.png" width="826" alt="开启插件开发能力" class="ne-image">
+![开启插件开发能力](/img/02.png)
 
 ### 说清楚你想要什么
 
@@ -42,7 +42,7 @@ Vibe Coding 是 ZTools 里的 AI 助手。你可以像聊天一样提需求，�
 
 需求越具体，第一次结果通常越接近你的预期。不确定怎么说时，也可以先让 AI 帮你整理需求。
 
-<img src="/img/03.png" width="824" alt="在会话中描述插件需求" class="ne-image">
+![在会话中描述插件需求](/img/03.png)
 
 ### 看进度并继续沟通
 
@@ -50,9 +50,9 @@ AI 工作时会显示思考、读取文件、修改文件和执行命令等过�
 
 如果 AI 正在执行命令，请等它完成再继续。你可以随时发送补充说明，例如“按钮太大”“换成浅色主题”或“这个报错帮我修一下”。
 
-<img src="/img/04.png" width="826" alt="查看 AI 的工作过程" class="ne-image">
+![查看 AI 的工作过程](/img/04.png)
 
-<img src="/img/05.png" width="827" alt="查看插件开发进度" class="ne-image">
+![查看插件开发进度](/img/05.png)
 
 ## 第四步：构建并安装
 
@@ -62,15 +62,15 @@ AI 工作时会显示思考、读取文件、修改文件和执行命令等过�
 
 AI 会完成构建，并告诉你安装包在哪里。
 
-<img src="/img/06.png" width="826" alt="让 AI 构建插件" class="ne-image">
+![让 AI 构建插件](/img/06.png)
 
 然后到 ZTools 的插件管理页面选择本地安装，选中 AI 生成的文件夹或压缩包。
 
-<img src="/img/07.png" width="826" alt="选择插件安装包" class="ne-image">
+![选择插件安装包](/img/07.png)
 
 安装后就可以在 ZTools 中使用新插件了。
 
-<img src="/img/08.png" width="824" alt="插件安装完成后的效果" class="ne-image">
+![插件安装完成后的效果](/img/08.png)
 
 ## 常用操作
 
