@@ -9,6 +9,8 @@ ZTools 插件的核心模型是：**Web 前端页面 + Node.js 本地能力 + ZT
 - `plugin.json` 负责声明插件元信息、入口、Logo、功能和触发指令。
 - `window.ztools` 是插件调用 ZTools 能力的全局 API。
 
+AI 接口的完整参数、事件和类型参考见 [AI API](./ai-api.md)。本文只保留面向插件开发流程的使用建议和示例。
+
 ## AI 开发原则
 
 当 AI 生成或修改 ZTools 插件时，必须遵守以下规则：
@@ -470,7 +472,7 @@ ztools.onPluginDetach(() => {
 ### 搜索框
 
 ```javascript
-ztools.setSubInput((text) => {
+ztools.setSubInput(({ text }) => {
   search(text);
 }, "输入关键词", true);
 
@@ -605,8 +607,9 @@ const realPath = ztools.getPathForFile(file);
 ### 截图
 
 ```javascript
-ztools.screenCapture((image) => {
+ztools.screenCapture((image, bounds) => {
   // image 是 base64 Data URL
+  // bounds 是截图区域，包含 x、y、width、height
   ztools.copyImage(image);
 });
 ```
@@ -638,13 +641,18 @@ ztools.sendInputEvent({
 
 跨平台快捷键要判断系统，例如 macOS 使用 `command`，Windows/Linux 使用 `control`。
 
-### AI 能力
+### AI 使用示例
+
+完整的 AI 接口参考、参数、事件和类型说明见 [AI API](./ai-api.md)。
 
 非流式：
 
 ```javascript
 const result = await ztools.ai({
-  prompt: "把下面内容总结成三句话：..."
+  messages: [{
+    role: "user",
+    content: "把下面内容总结成三句话：..."
+  }]
 });
 ```
 
@@ -652,7 +660,12 @@ const result = await ztools.ai({
 
 ```javascript
 const request = ztools.ai(
-  { prompt: "写一段说明文字" },
+  {
+    messages: [{
+      role: "user",
+      content: "写一段说明文字"
+    }]
+  },
   (chunk) => {
     appendChunk(chunk);
   }
@@ -871,7 +884,7 @@ ztools.onPluginEnter(({ payload }) => {
   render(currentText);
 });
 
-ztools.setSubInput((text) => {
+ztools.setSubInput(({ text }) => {
   currentText = text;
   render(text);
 }, "输入要处理的文本");

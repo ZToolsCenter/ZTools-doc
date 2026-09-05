@@ -68,6 +68,78 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 预加载 js 文件，这是一个关键文件，你可以在此文件内调用 nodejs、 electron 提供的 api。
 查看更多关于 [preload.js](./preload.js)
 
+### `tools` 工具声明
+- 类型：`Record<string, ToolDeclaration>`
+- 必填：否
+
+声明插件通过 `ztools.registerTool` 暴露给 ZTools MCP 服务的工具。每个 key 是工具名称，必须与 preload 中 `ztools.registerTool(name, handler)` 的 `name` 一致。
+
+```json
+{
+  "tools": {
+    "list_files": {
+      "description": "列出指定目录中的文件",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      },
+      "outputSchema": {
+        "type": "object"
+      }
+    }
+  }
+}
+```
+
+#### ToolDeclaration 字段
+
+- `description`: `string`，必填，工具说明。
+- `inputSchema`: `object`，必填，符合 JSON Schema 的输入结构。
+- `outputSchema`: `object`，可选，工具输出结构。
+
+工具声明只描述名称和数据结构，实际处理器仍需在 preload 中注册：
+
+```javascript
+ztools.registerTool("list_files", async ({ path }) => {
+  return { path, entries: [] };
+});
+```
+
+### `providers` Provider 声明
+- 类型：`Record<string, ProviderDeclaration>`
+- 必填：否
+
+声明插件提供的翻译或 OCR Provider。对象 key 是插件内唯一的声明 key，不必等于 `type`；后续 `ztools.registerProvider(key, handler)` 必须使用相同的 key。
+
+```json
+{
+  "providers": {
+    "baidu": {
+      "type": "translation",
+      "label": "百度翻译",
+      "description": "百度翻译服务"
+    },
+    "cloud_ocr": {
+      "type": "ocr",
+      "label": "云 OCR"
+    }
+  }
+}
+```
+
+#### ProviderDeclaration 字段
+
+- `type`: `'translation' | 'ocr'`，必填。
+  - `translation` 的输入为 `{ text, from?, to? }`。
+  - `ocr` 的输入为 `{ image, lang? }`。
+- `label`: `string`，可选，在设置页展示的名称。
+- `description`: `string`，可选，在设置页展示的说明。
+
+同一插件可以为同一 `type` 声明多个不同 key。完整的注册和消费方式见 [Provider 开发指南](./provider-development-guide.md)。
+
 ## 开发模式字段说明
 
 ### `development`

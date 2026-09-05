@@ -50,6 +50,26 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **返回**: `boolean` - 是否为深色主题。
 
+### `ztools.getUser()`
+获取当前登录用户的公开资料。未登录时返回 `null`。
+
+- **返回**: `object | null` - 用户资料，通常包含 `avatar`、`nickname`、`uid`。
+
+### `ztools.getUserTempToken()`
+获取当前插件访问 ZTools 服务端的短期鉴权令牌。
+
+- **返回**: `Promise<object>` - `{ token: string, expiredAt: number }`，`expiredAt` 为毫秒级时间戳。
+
+### `ztools.getThemeInfo()`
+获取当前主题信息。
+
+- **返回**: `object` - 包含 `isDark`、`primaryColor`、`customColor`、`windowMaterial` 等字段。
+
+### `ztools.onThemeChange(callback)`
+监听主题变化。再次注册会替换之前的回调。
+
+- **callback**: `(themeInfo: object) => void` - 主题变化时调用，参数结构与 `getThemeInfo()` 返回值一致。
+
 ### `ztools.isDev()`
 检查当前插件是否处于开发模式。
 
@@ -69,6 +89,13 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 显示系统通知。
 
 - **body**: `string` - 通知内容。
+
+### `ztools.showToast(message, options)`
+在 ZTools 界面中显示 Toast 提示。
+
+- **message**: `string` - 提示内容。
+- **options**: `object` - (可选) Toast 配置，会与 `message` 合并后传给宿主。
+- **返回**: `Promise<object>` - 宿主返回的 Toast 操作结果。
 
 ### `ztools.sendInputEvent(event)`
 发送模拟输入事件。
@@ -105,6 +132,38 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **key**: `string` - 要按下的键。
 - **modifiers**: `string[]` - 修饰键数组（可选）。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.findInPage(text, options)`
+在当前插件页面中查找文本。
+
+- **text**: `string` - 要查找的文本。
+- **options**: `object` - (可选) 查找选项，可包含 `forward`、`findNext`、`matchCase`、`wordStart`、`medialCapitalAsWordStart`。
+- **返回**: `Promise<{ success: boolean, requestId?: number, error?: string }>` - 查找请求结果。
+
+### `ztools.stopFindInPage(action)`
+停止页面查找。
+
+- **action**: `'clearSelection' | 'keepSelection' | 'activateSelection'` - (可选) 停止行为，默认 `'clearSelection'`。
+- **返回**: `Promise<{ success: boolean, error?: string }>` - 停止查找结果。
+
+### `ztools.onFindInPageResult(callback)` / `ztools.offFindInPageResult(callback)`
+监听或取消监听页面查找结果。
+
+- **callback**: `(result: object) => void` - 查找结果回调。结果对象来自 Electron `found-in-page` 事件，包含 `requestId`、`activeMatchOrdinal`、`matches`、`selectionArea`、`finalUpdate` 等字段。
+
+### `ztools.simulateMouseMove(x, y)`
+模拟鼠标移动到屏幕坐标。
+
+- **x**: `number` - 屏幕 X 坐标。
+- **y**: `number` - 屏幕 Y 坐标。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.simulateMouseClick(x, y)` / `ztools.simulateMouseDoubleClick(x, y)` / `ztools.simulateMouseRightClick(x, y)`
+分别模拟鼠标左键单击、左键双击和右键单击。
+
+- **x**: `number` - 屏幕 X 坐标。
+- **y**: `number` - 屏幕 Y 坐标。
 - **返回**: `boolean` - 是否成功。
 
 ### `ztools.showMainWindow()`
@@ -166,7 +225,7 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 ### `ztools.setSubInput(onChange, placeholder, isFocus)`
 设置主窗口搜索框的行为（当插件处于活动状态时）。
 
-- **onChange**: `(text: string) => void` - 当用户在搜索框输入时触发的回调函数。
+- **onChange**: `(details: { text: string }) => void` - 当用户在搜索框输入时触发的回调函数。
 - **placeholder**: `string` - 搜索框的占位符文本。
 - **isFocus**: `boolean` - (可选) 是否自动聚焦搜索框，默认 `true`。
 
@@ -323,13 +382,13 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 删除剪贴板记录。
 
 - **id**: `string` - 记录 ID。
-- **返回**: `Promise<boolean>` - 是否成功。
+- **返回**: `Promise<{ success: boolean }>` - 是否成功。
 
 ### `ztools.clipboard.clear(type)`
 清空剪贴板历史。
 
 - **type**: `string` - (可选) 类型过滤。
-- **返回**: `Promise<boolean>` - 是否成功。
+- **返回**: `Promise<{ success: boolean, count: number }>` - 是否成功及清除数量。
 
 ### `ztools.clipboard.getStatus()`
 获取剪贴板状态。
@@ -341,22 +400,22 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **id**: `string` - 记录 ID。
 - **shouldPaste**: `boolean` - (可选) 是否同时模拟粘贴操作，默认 `true`。
-- **返回**: `Promise<boolean>` - 是否成功。
+- **返回**: `Promise<{ success: boolean }>` - 是否成功。
 
 ### `ztools.clipboard.writeContent(data, shouldPaste)`
 写入内容到剪贴板。
 
 - **data**: `object` - 数据对象。
-  - `type`: `'text' | 'image'` - 内容类型。
-  - `content`: `string` - 内容（文本或 base64 图片）。
+  - `type`: `'text' | 'image' | 'file'` - 内容类型。
+  - `content`: `string | string[]` - 文本、图片内容，或单个文件路径/文件路径数组。`text` 和 `image` 类型要求为字符串。
 - **shouldPaste**: `boolean` - (可选) 是否同时模拟粘贴操作，默认 `true`。
-- **返回**: `Promise<boolean>` - 是否成功。
+- **返回**: `Promise<{ success: boolean }>` - 是否成功。
 
 ### `ztools.clipboard.updateConfig(config)`
 更新剪贴板配置。
 
 - **config**: `object` - 配置对象。
-- **返回**: `Promise<boolean>` - 是否成功。
+- **返回**: `Promise<{ success: boolean }>` - 是否成功。
 
 ### `ztools.clipboard.onChange(callback)`
 监听剪贴板变化事件。
@@ -372,14 +431,19 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 ### `ztools.copyImage(image)`
 复制图片到剪贴板。
 
-- **image**: `string` - 图片 base64 Data URL 或文件路径。
+- **image**: `string | Buffer | Uint8Array` - 图片 base64 Data URL、文件路径或图片二进制数据。
 - **返回**: `boolean` - 是否成功。
 
 ### `ztools.copyFile(filePath)`
 复制文件到剪贴板。
 
-- **filePath**: `string` - 文件路径。
+- **filePath**: `string | string[]` - 单个文件路径或文件路径数组。
 - **返回**: `boolean` - 是否成功。
+
+### `ztools.getCopyedFiles()`
+获取当前系统剪贴板中的文件或文件夹列表。方法名中的 `Copyed` 为兼容现有 API 的拼写。
+
+- **返回**: `object[]` - 文件项数组，每项包含 `path`、`name`、`isFile`、`isDirectory`。
 
 ## 文件操作 API
 
@@ -404,8 +468,40 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 ### `ztools.screenCapture(callback)`
 屏幕截图，会进入截图模式，用户截图完执行回调函数。
 
-- **callback**: `(image: string) => void` - 截图完的回调函数。
+- **callback**: `(image: string, bounds: object) => void` - 截图完的回调函数。
   - `image`: 截图的图像 base64 Data Url。
+  - `bounds`: 截图区域，包含 `x`、`y`、`width`、`height`。
+- **返回**: `Promise<void>` - 截图流程结束后完成。
+
+### `ztools.screenColorPick(callback)`
+进入屏幕取色模式，取色成功后调用回调。
+
+- **callback**: `(color: { hex: string, rgb: string }) => void` - 取色结果回调。
+- **返回**: `Promise<void>` - 取色流程结束后完成。
+
+### `ztools.startDrag(filePath)`
+开始将文件拖动到外部应用。
+
+- **filePath**: `string | string[]` - 要拖动的文件路径或路径数组。
+
+### `ztools.hideMainWindowPasteText(text)` / `ztools.hideMainWindowPasteImage(image)`
+隐藏主窗口，并将文本或图片粘贴到之前获得焦点的外部应用。
+
+- **text**: `string` - 要粘贴的文本。
+- **image**: `string | Uint8Array` - 图片 Data URL、路径或图片二进制数据。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.hideMainWindowPasteFile(filePath)`
+隐藏主窗口，并将文件粘贴到之前获得焦点的外部应用。
+
+- **filePath**: `string | string[]` - 文件路径或路径数组。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.hideMainWindowTypeString(text)`
+隐藏主窗口，并向之前获得焦点的外部应用模拟键入字符串。
+
+- **text**: `string` - 要键入的文本。
+- **返回**: `boolean` - 是否成功。
 
 ## 窗口 API
 
@@ -415,7 +511,7 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 - **url**: `string` - 窗口加载的 URL。
 - **options**: `object` - 窗口选项，与 Electron `BrowserWindow` 构造函数选项保持一致。
 - **callback**: `() => void` - (可选) 窗口加载完成后的回调函数。
-- **返回**: `Proxy<BrowserWindow> | null` - 返回一个模拟 BrowserWindow 的 Proxy 对象，可用于调用窗口方法和访问属性。创建失败返回 `null`。
+- **返回**: `object` - 返回带 `id`、`webContents` 和宿主白名单方法的窗口对象。主窗口方法和 `webContents` 方法分别可能是同步方法或返回 Promise 的异步方法，具体方法由当前版本宿主提供。
 
 ### `ztools.sendToParent(channel, ...args)`
 发送消息到父窗口。
@@ -476,27 +572,65 @@ DIP 区域转屏幕物理区域。
 使用系统默认程序打开 URL。
 
 - **url**: `string` - 要打开的 URL。
-- **返回**: `boolean` - 是否成功。
+- **返回**: `object` - `{ success: boolean, error?: string }`。
 
 ### `ztools.shellOpenPath(fullPath)`
 使用系统默认方式打开文件或文件夹。
 
 - **fullPath**: `string` - 文件或文件夹路径。
-- **返回**: `boolean` - 是否成功。
+- **返回**: `object` - `{ success: boolean, error?: string }`。
 
 ### `ztools.shellShowItemInFolder(fullPath)`
 在文件管理器中显示文件。
 
 - **fullPath**: `string` - 文件路径。
-- **返回**: `boolean` - 是否成功。
+- **返回**: `undefined` - 请求已发送；具体打开结果由系统文件管理器处理。
+
+### `ztools.shellBeep()`
+播放系统提示音。
+
+- **返回**: `object` - `{ success: boolean, error?: string }`。
+
+### `ztools.shellTrashItem(fullPath)`
+将文件或文件夹移动到系统回收站。
+
+- **fullPath**: `string` - 文件或文件夹路径。
+- **返回**: `Promise<{ success: boolean }>` - 是否成功；失败时可能抛出 Error。
+
+### `ztools.readCurrentFolderPath()`
+读取当前活动文件管理器窗口的文件夹路径。macOS 支持 Finder，Windows 支持 Explorer。
+
+- **返回**: `Promise<string>` - 当前文件夹路径。
+
+### `ztools.readCurrentBrowserUrl()`
+读取当前活动浏览器窗口的 URL。前提是当前活动窗口属于受支持的浏览器。
+
+- **返回**: `Promise<string>` - 当前 URL。
+
+### `ztools.getFileIcon(filePath)`
+获取文件系统图标。
+
+- **filePath**: `string` - 文件路径。
+- **返回**: `string | null` - 图标的 base64 Data URL；获取失败时为 `null`。
 
 ## 其他 API
 
 ### `ztools.redirect(label, payload)`
 插件跳转。
 
-- **label**: `string` - 目标插件的 label。
-- **payload**: `any` - 传递的数据。
+- **label**: `string | [string, string]` - 指令名称，或 `[插件标题, 指令名称]`。
+- **payload**: `string` - (可选) 传递给目标指令的文本。当前实现只按字符串处理非空 payload。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.redirectHotKeySetting(cmdLabel)`
+跳转到快捷键设置，并定位到指定指令。
+
+- **cmdLabel**: `string` - 指令名称。
+- **返回**: `boolean` - 是否成功。
+
+### `ztools.redirectAiModelsSetting()`
+跳转到 AI 模型设置页面。当前设置页已将 AI 模型入口并入 Provider 页面。
+
 - **返回**: `boolean` - 是否成功。
 
 ### `ztools.http.setHeaders(headers)`
@@ -515,84 +649,171 @@ DIP 区域转屏幕物理区域。
 
 - **返回**: `boolean` - 是否成功。
 
-## AI API
+## 工具注册 API
 
-### `ztools.ai(option, streamCallback)`
-调用 AI 模型。支持流式和非流式两种模式。返回一个 PromiseLike 对象，同时具有 `abort()` 方法可中断请求。
+### `ztools.registerTool(name, handler)`
+注册一个供 ZTools MCP 服务调用的插件工具。工具必须先在 `plugin.json.tools` 中声明，详见 [plugin.json 配置](./plugin-json.md#tools-工具声明)。
 
-- **option**: `object` - AI 调用配置。
-- **streamCallback**: `(chunk: any) => void` - (可选) 流式回调函数。传入此参数时启用流式模式，每收到一段数据会调用此回调。
-- **返回**: `PromiseLike & { abort: () => void }` - 可 await 的 Promise 对象。
-  - 非流式模式：resolve 时返回 AI 响应数据。
-  - 流式模式：数据通过 `streamCallback` 逐步推送，Promise resolve 时表示完成。
-  - 调用 `.abort()` 可中断请求。
-
-#### 使用示例
+- **name**: `string` - 工具名称，必须与 `plugin.json.tools` 中的 key 一致。
+- **handler**: `(input: object) => any | Promise<any>` - 工具处理器，接收调用输入并返回结果。
+- **返回**: `void` - 注册成功后结束。
+- **异常**: 工具未声明、名称为空或 handler 不是函数时抛出 Error。
 
 ```javascript
-// 非流式调用
-const result = await ztools.ai({ prompt: '你好' })
-
-// 流式调用
-const request = ztools.ai({ prompt: '你好' }, (chunk) => {
-  console.log('收到数据:', chunk)
-})
-await request
-
-// 中断请求
-request.abort()
+ztools.registerTool("list_files", async ({ path }) => {
+  return { path, entries: [] };
+});
 ```
 
-### `ztools.aiChat(option, eventCallback)`
-发起一次由插件自行管理工具循环的流式 Chat Completions 请求。ZTools 负责解析模型、保护供应商凭据、适配推理协议并传输流；不会确认、执行或回填模型返回的工具调用。
+## Provider API
 
-- **option.model**: `string` - `allAiModels()` 返回的 `value`，兼容传入旧版 `id`。
-- **option.messages**: `object[]` - `system`、`user`、`assistant`、`tool` 消息数组，支持 `image_url` 内容块。
-- **option.tools**: `object[]` - (可选) OpenAI function calling 格式的工具定义。
-- **option.toolChoice**: `'auto' | 'none' | 'required'` - (可选) 工具选择策略。
-- **option.reasoning**: `object` - (可选) 覆盖宿主中该模型的推理协议、强度或响应字段。
-- **option.temperature**: `number` - (可选) 采样温度。
-- **option.maxTokens**: `number` - (可选) 最大输出 token 数。
-- **option.timeout**: `number` - (可选) 请求超时毫秒数。
-- **option.streamBatchIntervalMs**: `number` - (可选) 连续正文、思考和同一工具参数事件的合并窗口，范围为 `0～1000` 毫秒；`0` 或省略时逐事件回调。状态边界和请求结束前会强制刷新。
-- **eventCallback**: `(event) => void` - 接收 `request`、`reasoning`、`reasoning_end`、`content`、`tool_call` 和 `usage` 事件。
-- **返回**: `Promise<AssistantMessage> & { abort: () => void }` - 完整助手消息，包含 `content`、`reasoning_content`、`tool_calls`、`finish_reason` 和可选 `usage`。
-- **异常**: 请求失败时抛出带 `code` 的 Error；可用字段还包括 `status`、`providerCode`、`requestId` 和 `retryAfterMs`。
+Provider 支持两种角色：插件可以注册翻译/OCR Provider，也可以消费其他插件或内置 Provider。完整配置和契约见 [Provider 开发指南](./provider-development-guide.md)。
 
-#### 使用示例
+### `ztools.registerProvider(key, handler)`
+注册一个翻译或 OCR Provider 的处理器。
+
+- **key**: `string` - 必须与 `plugin.json.providers` 中的 key 一致。
+- **handler**: `(input: object) => Promise<object>` - Provider 处理器，输入输出结构由声明的 `type` 决定。
+- **返回**: `void` - 注册成功后结束。
+- **异常**: key 未声明、为空或 handler 不是函数时抛出 Error。
+
+### `ztools.providers.getProviders(type)`
+查询 Provider 列表。
+
+- **type**: `'translation' | 'ocr'` - (可选) 指定类型；省略时返回全部类型。
+- **返回**: `Promise<object[]>` - Provider 列表，每项包含 `id`、`type`、`label`、`description`、`source`、`isDefault` 等字段。
+
+### `ztools.providers.getDefaultProvider(type)`
+查询指定类型的默认 Provider。
+
+- **type**: `'translation' | 'ocr'` - Provider 类型。
+- **返回**: `Promise<object | null>` - 默认 Provider；没有可用 Provider 时返回 `null`。
+
+### `ztools.providers.invokeProvider(type, input, providerId)`
+调用 Provider。省略 `providerId` 时使用该类型的默认 Provider。
+
+- **type**: `'translation' | 'ocr'` - Provider 类型。
+- **input**: `object` - Provider 输入。
+- **providerId**: `string` - (可选) 指定 Provider ID。
+- **返回**: `Promise<object>` - Provider 输出。
+
+### `ztools.translate(text, options)`
+调用翻译 Provider 的便捷封装。
+
+- **text**: `string` - 待翻译文本。
+- **options**: `object` - (可选) `{ from?: string, to?: string, providerId?: string }`。
+- **返回**: `Promise<{ text: string, detectedFrom?: string }>` - 翻译结果。
+
+### `ztools.ocr(image, options)`
+调用 OCR Provider 的便捷封装。
+
+- **image**: `string` - 图片路径、Data URI 或 URL，具体支持取决于 Provider。
+- **options**: `object` - (可选) `{ lang?: string, providerId?: string }`。
+- **返回**: `Promise<{ text: string, blocks?: string[], confidence?: number }>` - OCR 结果。
+
+## 浏览器自动化 API
+
+`ztools.zbrowser` 和 `ztools.ubrowser` 都返回一个新的 Builder 实例，方法支持链式调用。调用 `run()` 时才会创建或复用浏览器窗口并执行操作队列。
 
 ```javascript
-const models = await ztools.allAiModels()
-const events = []
-const request = ztools.aiChat(
+const result = await ztools.zbrowser
+  .goto("https://example.com")
+  .wait("h1")
+  .click("a")
+  .evaluate(() => document.title)
+  .run({ width: 900, height: 600 })
+```
+
+### Builder 方法
+
+| 方法 | 说明 |
+| --- | --- |
+| `goto(url, headers?, timeout?)` | 打开 URL |
+| `hide()` / `show()` | 隐藏或显示浏览器窗口 |
+| `useragent(userAgent)` | 设置 User-Agent |
+| `viewport(width, height)` | 设置视口大小 |
+| `css(css)` | 注入 CSS |
+| `press(key, ...modifiers)` | 模拟键盘按键 |
+| `paste(text?)` | 执行粘贴，可选传入文本或图片 Base64 |
+| `screenshot(arg?, savePath?)` | 截图，可按选择器或区域截图 |
+| `pdf(options?, savePath?)` | 导出 PDF |
+| `device(device)` | 模拟设备尺寸和 User-Agent |
+| `cookies(nameOrFilter?)` | 获取 Cookie |
+| `setCookies(name, value)` / `setCookies(cookies)` | 设置 Cookie |
+| `removeCookies(name)` | 删除 Cookie |
+| `clearCookies(url?)` | 清空 Cookie |
+| `devTools(mode?)` | 打开开发者工具 |
+| `evaluate(fn, ...args)` | 在目标页面执行 JS，可执行异步函数 |
+| `wait(msOrSelectorOrFn, options?, ...args)` | 等待时间、元素或判断函数 |
+| `when(selectorOrFn, ...args)` / `end()` | 条件执行操作队列 |
+| `mouse(eventName, selector)` | 对元素分发鼠标事件 |
+| `click(target, mouseButton?)` | 点击元素或坐标 |
+| `mousedown(target, mouseButton?)` / `mouseup(target, mouseButton?)` | 鼠标按下或抬起 |
+| `dblclick(target, mouseButton?)` | 双击元素或坐标 |
+| `hover(target)` | 悬停元素或移动到坐标 |
+| `drop(target, payload)` | 拖放文件到元素或坐标 |
+| `markdown(selector?)` | 将页面或元素转换为 Markdown |
+| `input(text)` / `input(selector, text)` | 输入文本 |
+| `file(selector, fileData)` | 设置文件 input，支持路径、Base64、`Uint8Array` 或路径数组 |
+| `download(urlOrFunction, savePath?, ...args)` | 下载 URL 或函数返回的 URL |
+| `value(selector, value)` | 设置表单元素的值 |
+| `check(selector, checked?)` | 设置复选框状态 |
+| `focus(selector)` | 聚焦元素 |
+| `scroll(...)` | 滚动页面或滚动到元素 |
+| `run(ubrowserIdOrOptions?, options?)` | 执行队列并返回 Promise |
+
+`run()` 支持以下形式：
+
+```javascript
+await ztools.zbrowser.goto("https://example.com").run()
+await ztools.zbrowser.goto("https://example.com").run({ show: true })
+await ztools.zbrowser.goto("https://example.com").run(3, { show: true })
+```
+
+当窗口保持显示时，后续 Builder 实例可以通过 `getIdleUBrowsers()` 返回的窗口 ID 复用它。
+
+### `ztools.getIdleUBrowsers()`
+获取当前插件的空闲浏览器窗口。
+
+- **返回**: `object[]` - 窗口信息数组，每项包含 `id`、`title`、`url`。
+
+### `ztools.setUBrowserProxy(config)`
+设置当前插件浏览器 Session 的代理。ZTools 返回 Promise，与 uTools 的同步 API 不同。
+
+- **config**: `object` - Electron Session 代理配置，例如 `pacScript`、`proxyRules`、`proxyBypassRules`。
+- **返回**: `Promise<boolean>` - 是否成功。
+
+### `ztools.clearUBrowserCache()`
+清除当前插件浏览器 Session 的缓存。
+
+- **返回**: `Promise<boolean>` - 是否成功。
+
+### `ztools.ubrowserLogin()`
+兼容 uTools 的登录接口。
+
+- **返回**: `Promise<null>` - ZTools 当前不支持此功能，固定返回 `null`。
+
+## FFmpeg API
+
+### `ztools.runFFmpeg(args, options)`
+在插件进程中执行 FFmpeg 命令。FFmpeg 路径由 ZTools 管理，插件只需要传入命令行参数。
+
+- **args**: `string[]` - FFmpeg 命令行参数。
+- **options**: `Function | object` - (可选) 直接传入函数时视为 `onProgress`；传入对象时可包含 `onProgress` 和 `onLog`。
+- **返回**: `Promise<void> & { kill: () => void, quit: () => void }` - 可等待、强制终止或优雅退出的任务。
+
+`onProgress` 会收到解析后的 FFmpeg 进度对象，包含 FFmpeg 输出中的键值，可能额外包含 `percent`；`onLog` 会收到 stderr 文本。覆盖已有文件时，ZTools 会自动回答 `N`，拒绝覆盖。
+
+```javascript
+const task = ztools.runFFmpeg(
+  ["-i", inputPath, "-y", outputPath],
   {
-    model: models[0].value,
-    messages: [{ role: 'user', content: '列出当前目录中的文件' }],
-    streamBatchIntervalMs: 50,
-    tools: [
-      {
-        type: 'function',
-        function: {
-          name: 'list_files',
-          description: '列出目录内容',
-          parameters: {
-            type: 'object',
-            properties: { path: { type: 'string' } },
-            required: ['path']
-          }
-        }
-      }
-    ]
-  },
-  (event) => events.push(event)
+    onProgress: (progress) => console.log(progress.percent),
+    onLog: (line) => console.log(line)
+  }
 )
 
-const assistant = await request
-// assistant.tool_calls 仅描述模型请求的工具；插件需自行确认、执行并继续下一轮。
+await task
 ```
 
-### `ztools.allAiModels()`
-获取所有可用的 AI 模型列表。
-
-- **返回**: `Promise<object[]>` - AI 模型数组。每项包含用于展示的 `label`、用于持久化和回传的稳定 `value`、远端 `modelId`、`contextWindow`、`inputModalities` 和 `reasoning` 能力；不会暴露供应商 API Key 或 API URL。
-- **异常**: 获取失败时抛出 Error。
+需要停止时可以调用 `task.kill()`，希望 FFmpeg 自己收尾时调用 `task.quit()`。
