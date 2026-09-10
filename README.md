@@ -81,6 +81,7 @@ doc/
 - [插件应用目录结构](./docs/file-structure.md) - 了解插件应用的文件结构
 - [plugin.json 配置](./docs/plugin.json.md) - 插件配置文件说明
 - [插件 API](./docs/plugin-api.md) - 完整的 API 参考文档
+- [插件赞赏支付](./docs/plugin-payment.md) - 创建赞赏订单、接收支付成功回调并查询支付记录
 - [preload.js](./docs/preload.js.md) - 预加载脚本说明
 - [Node.js](./docs/node.js.md) - Node.js 相关功能
 
@@ -104,4 +105,3 @@ doc/
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request 来帮助改进文档。
-

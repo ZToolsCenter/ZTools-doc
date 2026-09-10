@@ -43,6 +43,7 @@ export default defineConfig({
           { text: 'preload.js 配置', link: '/preload-js' },
           { text: 'Node.js 能力', link: '/node-js' },
           { text: '插件 API', link: '/plugin-api' },
+          { text: '插件赞赏支付', link: '/plugin-payment' },
           { text: 'Provider 开发指南', link: '/provider-development-guide' },
           { text: 'AI API', link: '/ai-api' },
           { text: 'AI 插件开发指南', link: '/ai-plugin-guide' },

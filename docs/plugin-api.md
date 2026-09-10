@@ -60,6 +60,10 @@ ZTools 为插件提供了一套丰富的 API，通过全局对象 `window.ztools
 
 - **返回**: `Promise<object>` - `{ token: string, expiredAt: number }`，`expiredAt` 为毫秒级时间戳。
 
+::: tip 插件赞赏支付
+需要在插件中发起赞赏或查询当前用户的支付记录时，请阅读独立的 [插件赞赏支付 API](./plugin-payment.md) 文档。
+:::
+
 ### `ztools.getThemeInfo()`
 获取当前主题信息。
 

@@ -10,6 +10,7 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
   "title": "示例插件",
   "description": "这是一个示例插件",
   "version": "1.0.0",
+  "platform": ["darwin"],
   "main": "index.html",
   "logo": "logo.png",
   "preload": "preload.js",
@@ -48,6 +49,12 @@ plugin.json 文件是一个标准的 JSON 文件，它的结构如下：
 - 必填：否
 
 插件应用版本
+
+### `platform`
+- 类型：`Array<'win32' | 'darwin' | 'linux'>`
+- 必填：否
+
+限制整个插件支持的平台。不填写时默认支持所有平台。平台限制应放在 `plugin.json` 顶层，不要写到 `features[]` 内。
 
 ### `main`
 - 类型：`string`
