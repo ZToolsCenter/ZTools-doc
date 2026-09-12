@@ -82,6 +82,7 @@ doc/
 - [plugin.json 配置](./docs/plugin.json.md) - 插件配置文件说明
 - [插件 API](./docs/plugin-api.md) - 完整的 API 参考文档
 - [插件赞赏支付](./docs/plugin-payment.md) - 创建赞赏订单、接收支付成功回调并查询支付记录
+- [开发者服务端 API](./docs/developer-server-api.md) - 使用开发者 Token 查询用户资料、订单状态并接收支付回调
 - [preload.js](./docs/preload.js.md) - 预加载脚本说明
 - [Node.js](./docs/node.js.md) - Node.js 相关功能
 
